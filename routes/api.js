@@ -30,8 +30,34 @@ router.put('/users/:id', async function (req, res){
        
        res.json(updated)
    } catch(err){
-    res.status(500).json(err)
+    res.status(422).json(err)
    }
 });
+
+router.delete('/users/:id', async function (req, res){
+ const deleted = await User.findByIdAndDelete(req.params.id);
+    res.json({ data: 'success!'})
+});
+
+router.post('/users/:userId/friends/:friendId', async function (req, res){
+
+   const updated = await User.findByIdAndUpdate(req.params.userId, {
+        $push: {
+            friends: req.params.friendId
+        }
+    }, {new: true});
+    res.json(updated);
+});
+
+router.delete('/users/:userId/friends/:friendId', async function (req, res){
+
+   const updated = await User.findByIdAndUpdate(req.params.userId, {
+        $pull: {
+            friends: req.params.friendId
+        }
+    }, {new: true});
+    res.json(updated);
+});
+
 
 module.exports = router
