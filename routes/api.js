@@ -142,6 +142,26 @@ router.post('/thoughts/:id/reactions', async function (req, res) {
     }
   });
 
+  router.delete('/thoughts/:thoughtId/reactions/:reactionId', async function(req, res) {
+    try {
+      const { thoughtId, reactionId } = req.params;
+  
+      const dbThoughtData = await Thought.findByIdAndUpdate(thoughtId, {
+        $pull: { reactions: { _id: reactionId } }
+      }, { new: true });
+  
+      if (!dbThoughtData) {
+        return res.status(404).json({ message: "No Thought Found." });
+      }
+  
+      return res.json(dbThoughtData);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal Server Error." });
+    }
+  });
+  
+
   
   
 
