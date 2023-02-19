@@ -160,6 +160,46 @@ router.post('/thoughts/:id/reactions', async function (req, res) {
       return res.status(500).json({ message: "Internal Server Error." });
     }
   });
+
+  router.post('/users/:id/friends', async function(req, res) {
+    const { id } = req.params;
+    const { friendId } = req.body;
+  
+    try {
+      const dbUserData = await User.findByIdAndUpdate(id, {
+        $addToSet: { friends: friendId }
+      }, { new: true });
+  
+      if (!dbUserData) {
+        return res.status(404).json({ message: "No User Found." });
+      }
+  
+      return res.json(dbUserData);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal Server Error." });
+    }
+  });
+
+  router.delete('/users/:id/friends/:friendId', async function(req, res) {
+    const { id, friendId } = req.params;
+  
+    try {
+      const dbUserData = await User.findByIdAndUpdate(id, {
+        $pull: { friends: friendId }
+      }, { new: true });
+  
+      if (!dbUserData) {
+        return res.status(404).json({ message: "No User Found." });
+      }
+  
+      return res.json(dbUserData);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal Server Error." });
+    }
+  });
+  
   
 
   
