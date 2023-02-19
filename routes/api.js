@@ -116,13 +116,36 @@ router.put('/thoughts/:id', async function (req, res) {
 })
 
 router.delete('/thoughts/:id', async function (req, res) {
-    // try{
         const deleted = await Thought.findByIdAndDelete(req.params.id);
         res.json({data: 'success!'})
-    // }catch(err){
-
-    // }
+  
 })
+
+router.post('/thoughts/:id/reactions', async function (req, res) {
+    const body = req.body;
+  
+    try {
+      const dbThoughtData = await Thought.findByIdAndUpdate(
+        req.params.id,
+        { $addToSet: { reactions: body }},
+        { new: true }
+      );
+      
+      if (!dbThoughtData) {
+        return res.status(404).json({ message: "No Thought Found."});
+      }
+  
+      return res.json(dbThoughtData);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal Server Error." });
+    }
+  });
+
+  
+  
+
+
 
 
 module.exports = router
