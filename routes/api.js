@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const { Thought, User } = require('../models')
 
 const router = require('express').Router();
 
@@ -58,6 +58,71 @@ router.delete('/users/:userId/friends/:friendId', async function (req, res){
     }, {new: true});
     res.json(updated);
 });
+
+
+router.get('/thoughts', async function (req, res){
+    const thoughts = await Thought.find({});
+    console.log(thoughts)
+    
+    res.json(thoughts);
+});
+
+
+router.get('/thoughts/:id', async function (req, res) {
+   try{
+       const thought = await Thought.findOne({
+           _id: req.params.id,
+       });
+       res.json(thought);
+   } catch (err){
+    res.status(500).json(err)
+   }
+})
+
+router.post('/thoughts', function (req, res) {
+    const data = Thought.create({
+        thoughtText: req.body.thoughtText,
+        username: req.body.username,
+        userId: req.body.userId
+    }).then((thought) => {
+        return User.findByIdAndUpdate(
+            {_id: req.body.userId},
+            {$addToSet: {thoughts: thought._id}},
+            {new: true}
+        );
+        })
+        .then((user) => 
+        !user
+        ? res.status(404).json({
+            message: 'Thought created, but found no user with that ID',
+        })
+        : res.json('Created Thought')
+        )
+        .catch((err) => {
+            console.log(err);
+            res.status(500).json(err);
+        });
+});
+
+router.put('/thoughts/:id', async function (req, res) {
+    try {
+        const updated = await Thought.findByIdAndUpdate(req.params.id, {
+            thoughtText: req.body.thoughtText
+        }, {new: true})
+        res.json(updated);
+    } catch(err){
+        res.status(500).json(err)
+    }
+})
+
+router.delete('/thoughts/:id', async function (req, res) {
+    // try{
+        const deleted = await Thought.findByIdAndDelete(req.params.id);
+        res.json({data: 'success!'})
+    // }catch(err){
+
+    // }
+})
 
 
 module.exports = router
